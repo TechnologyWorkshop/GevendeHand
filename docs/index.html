@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
@@ -15,7 +15,8 @@
     }
 
     header {
-      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      /* background: linear-gradient(135deg, #1a1a2e, #16213e); */
+        background: #0e5e55;
       color: white;
       padding: 1.5rem 2rem;
       display: flex;
@@ -58,44 +59,6 @@
       gap: .5rem;
     }
 
-    .add-form {
-      display: flex;
-      gap: .75rem;
-      margin-bottom: 1.8rem;
-    }
-
-    .add-form input {
-      flex: 1;
-      padding: .7rem 1rem;
-      border: 2px solid #e2e8f0;
-      border-radius: 10px;
-      font-size: .95rem;
-      transition: border-color .2s;
-      outline: none;
-    }
-
-    .add-form input:focus { border-color: #6c63ff; }
-
-    .btn {
-      padding: .7rem 1.2rem;
-      border: none;
-      border-radius: 10px;
-      font-size: .95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform .1s, box-shadow .2s;
-    }
-
-    .btn:active { transform: scale(.97); }
-
-    .btn-primary {
-      background: #6c63ff;
-      color: white;
-      box-shadow: 0 4px 12px rgba(108,99,255,.35);
-    }
-
-    .btn-primary:hover { background: #574fd6; }
-
     /* ── Product grid ── */
     .product-grid {
       display: grid;
@@ -119,13 +82,13 @@
     }
 
     .product-item:hover {
-      border-color: #6c63ff;
+      border-color: #0e5e55;
       box-shadow: 0 4px 14px rgba(108,99,255,.2);
       transform: translateY(-2px);
     }
 
     .product-item.selected {
-      border-color: #6c63ff;
+      border-color: #0e5e55;
       background: #f0eeff;
       box-shadow: 0 4px 18px rgba(108,99,255,.25);
     }
@@ -152,7 +115,7 @@
 
     .product-price {
       font-size: .85rem;
-      color: #6c63ff;
+      color: #0e5e55;
       font-weight: 700;
     }
 
@@ -167,9 +130,9 @@
       width: 26px;
       height: 26px;
       border-radius: 50%;
-      border: 2px solid #6c63ff;
+      border: 2px solid #0e5e55;
       background: white;
-      color: #6c63ff;
+      color: #0e5e55;
       font-size: 1rem;
       line-height: 1;
       cursor: pointer;
@@ -180,7 +143,7 @@
       transition: background .15s, color .15s;
     }
 
-    .qty-btn:hover { background: #6c63ff; color: white; }
+    .qty-btn:hover { background: #0e5e55; color: white; }
 
     .qty-value {
       font-size: .95rem;
@@ -214,7 +177,7 @@
     }
 
     .cart-line .line-name { font-weight: 500; }
-    .cart-line .line-total { font-weight: 700; color: #6c63ff; }
+    .cart-line .line-total { font-weight: 700; color: #0e5e55; }
 
     .cart-empty {
       text-align: center;
@@ -237,13 +200,13 @@
       font-weight: 700;
     }
 
-    .total-amount { color: #6c63ff; font-size: 1.35rem; }
+    .total-amount { color: #0e5e55; font-size: 1.35rem; }
 
     .btn-checkout {
       width: 100%;
       margin-top: 1.2rem;
       padding: .9rem;
-      background: linear-gradient(135deg, #6c63ff, #574fd6);
+      background: linear-gradient(135deg, #0e5e55, #574fd6);
       color: white;
       font-size: 1rem;
       font-weight: 700;
@@ -274,7 +237,7 @@
       transition: border-color .2s;
     }
 
-    .form-field input:focus { border-color: #6c63ff; }
+    .form-field input:focus { border-color: #0e5e55; }
 
     .form-field input.error { border-color: #e53e3e; }
 
@@ -306,8 +269,7 @@
 <body>
 
 <header>
-  <span>🛒</span>
-  <h1>Product Winkel</h1>
+  <h1>Gevende Hand</h1>
 </header>
 
 <div class="container">
@@ -315,13 +277,7 @@
   <!-- Left: catalog -->
   <div>
     <div class="card">
-      <h2>➕ Product toevoegen</h2>
-      <div class="add-form">
-        <input type="text" id="productInput" placeholder="Naam van het product…" maxlength="50" />
-        <button class="btn btn-primary" onclick="addProduct()">Toevoegen</button>
-      </div>
-
-      <h2>📦 Producten <span id="productCount" style="color:#a0aec0; font-weight:400; font-size:.9rem;">(0)</span></h2>
+      <h2>Kurban Donatie</h2>
       <div class="product-grid" id="productGrid">
         <div class="empty-state">
           <span class="empty-icon">📭</span>
@@ -348,15 +304,15 @@
       <h2 style="margin-bottom:.8rem">👤 Jouw gegevens</h2>
       <div class="customer-form">
         <div class="form-field">
-          <label for="klantNaam">Naam</label>
-          <input type="text" id="klantNaam" placeholder="Jouw naam…" maxlength="60" />
+          <label for="klantNaam">Namen</label>
+          <input type="text" id="klantNaam" placeholder="Namen offer gevende…" maxlength="60" />
         </div>
         <div class="form-field">
           <label for="klantTel">Telefoonnummer</label>
           <input type="tel" id="klantTel" placeholder="06-12345678" maxlength="20" />
         </div>
         <div class="form-field">
-          <label for="klantVekil">Vekil <span style="color:#a0aec0; font-weight:400;">(optioneel)</span></label>
+          <label for="klantVekil">Gemachtigde <span style="color:#a0aec0; font-weight:400;">(optioneel)</span></label>
           <input type="text" id="klantVekil" placeholder="Naam vekil… (optioneel)" maxlength="60" />
         </div>
       </div>
@@ -374,30 +330,12 @@
 <script>
   // Seed a few example products
   const products = [
-    { id: 1, name: 'Eten',   icon: '🍽️', qty: 0, price: 1 },
-    { id: 2, name: 'Sadaka', icon: '🤲', qty: 0, price: 2 },
-    { id: 3, name: 'Zekat',  icon: '💝', qty: 0, price: 3 },
+    { id: 1, name: 'Afrika',      icon: '🌍', qty: 0, price: 100 },
+    { id: 2, name: 'Bangladesh',  icon: '🇧🇩', qty: 0, price: 100 },
+    { id: 3, name: 'Turkije',     icon: '🇹🇷', qty: 0, price: 340 },
+    { id: 4, name: 'Syrie',       icon: '🇸🇾', qty: 0, price: 280 },
+    { id: 5, name: 'Afganistan',  icon: '🇦🇫', qty: 0, price: 110 },
   ];
-
-  let nextId = 4;
-  const icons = ['📦','🎁','🛍️','🔧','🖨️','📱','🎧','💡','🖱️','📷'];
-
-  function randomIcon() {
-    return icons[Math.floor(Math.random() * icons.length)];
-  }
-
-  function addProduct() {
-    const input = document.getElementById('productInput');
-    const name = input.value.trim();
-    if (!name) { showToast('Vul een productnaam in.'); return; }
-    if (products.find(p => p.name.toLowerCase() === name.toLowerCase())) {
-      showToast('Dit product bestaat al.'); return;
-    }
-    products.push({ id: nextId++, name, icon: randomIcon(), qty: 0, price: 1 });
-    input.value = '';
-    renderGrid();
-    showToast(`"${name}" toegevoegd!`);
-  }
 
   function changeQty(id, delta) {
     const p = products.find(p => p.id === id);
@@ -409,12 +347,6 @@
 
   function renderGrid() {
     const grid = document.getElementById('productGrid');
-    document.getElementById('productCount').textContent = `(${products.length})`;
-
-    if (products.length === 0) {
-      grid.innerHTML = `<div class="empty-state"><span class="empty-icon">📭</span>Voeg je eerste product toe via het formulier hierboven.</div>`;
-      return;
-    }
 
     grid.innerHTML = products.map(p => `
       <div class="product-item ${p.qty > 0 ? 'selected' : ''}" onclick="changeQty(${p.id}, 1)">
@@ -498,11 +430,6 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
   }
-
-  // Allow Enter key in input
-  document.getElementById('productInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') addProduct();
-  });
 
   // Initial render
   renderGrid();
