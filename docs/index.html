@@ -126,6 +126,33 @@
       margin-top: .2rem;
     }
 
+    .product-options {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .35rem .6rem;
+      margin-top: .35rem;
+      padding-top: .5rem;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .option-item {
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+      font-size: .8rem;
+      color: #2d3748;
+    }
+
+    .option-item input {
+      accent-color: #0e5e55;
+      cursor: pointer;
+    }
+
+    .option-item label {
+      cursor: pointer;
+    }
+
     .qty-btn {
       width: 26px;
       height: 26px;
@@ -329,18 +356,23 @@
 
 <script>
   // Seed a few example products
+  const optionLabels = ['Vacip', 'Nafile', 'Sukur', 'Akika'];
   const products = [
-    { id: 1, name: 'Afrika',      icon: '🌍', qty: 0, price: 100 },
-    { id: 2, name: 'Bangladesh',  icon: '🇧🇩', qty: 0, price: 100 },
-    { id: 3, name: 'Turkije',     icon: '🇹🇷', qty: 0, price: 340 },
-    { id: 4, name: 'Syrie',       icon: '🇸🇾', qty: 0, price: 280 },
-    { id: 5, name: 'Afganistan',  icon: '🇦🇫', qty: 0, price: 110 },
+    { id: 1, name: 'Afrika',      icon: '🌍', qty: 0, price: 100, selectedOption: 'Vacip' },
   ];
 
   function changeQty(id, delta) {
     const p = products.find(p => p.id === id);
     if (!p) return;
     p.qty = Math.max(0, p.qty + delta);
+    renderGrid();
+    renderCart();
+  }
+
+  function selectProductOption(id, optionName) {
+    const p = products.find(product => product.id === id);
+    if (!p || !optionLabels.includes(optionName)) return;
+    p.selectedOption = optionName;
     renderGrid();
     renderCart();
   }
@@ -358,6 +390,20 @@
           <button class="qty-btn" onclick="changeQty(${p.id}, -1)">−</button>
           <span class="qty-value">${p.qty}</span>
           <button class="qty-btn" onclick="changeQty(${p.id}, 1)">+</button>
+        </div>
+        <div class="product-options" onclick="event.stopPropagation()">
+          ${optionLabels.map(optionName => `
+            <div class="option-item">
+              <input
+                type="radio"
+                id="product-${p.id}-${optionName}"
+                name="product-option-${p.id}"
+                ${p.selectedOption === optionName ? 'checked' : ''}
+                onchange="selectProductOption(${p.id}, '${optionName}')"
+              />
+              <label for="product-${p.id}-${optionName}">${escHtml(optionName)}</label>
+            </div>
+          `).join('')}
         </div>
       </div>
     `).join('');
@@ -404,12 +450,18 @@
 
     const selected = products.filter(p => p.qty > 0);
     const total = selected.reduce((sum, p) => sum + p.qty * p.price, 0);
-    const productList = selected.map(p => `${p.qty}x${p.name}`).join('-');
-    const vekilDeel = vekil ? `-Vekil-${vekil}` : '-Vekil-FARKETMEZ';
+    const productList = selected.map(p => {
+      const optionSuffix = p.selectedOption ? `(${p.selectedOption})` : '';
+      return `${p.qty}x${p.name}${optionSuffix}`;
+    }).join('-');
+    const vekilDeel = vekil ? `-Vekil_${vekil}` : '-Vekil_FARKETMEZ';
     const description = `${naam}-${tel}${vekilDeel}-${productList}`;
     const bunqUrl = `https://bunq.me/GEVENDEHAND/${total}/${encodeURIComponent(description).replace(/%20/g, '+').replace(/%2C/g, ',')}`;
 
-    products.forEach(p => p.qty = 0);
+    products.forEach(p => {
+      p.qty = 0;
+      p.selectedOption = optionLabels[0];
+    });
     document.getElementById('klantNaam').value = '';
     document.getElementById('klantTel').value = '';
     document.getElementById('klantVekil').value = '';
