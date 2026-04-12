@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product Winkel</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      color: white;
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+
+    header h1 { font-size: 1.6rem; font-weight: 700; }
+    header span { font-size: 1.8rem; }
+
+    .container {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .container { grid-template-columns: 1fr; }
+    }
+
+    /* ── Add product panel ── */
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 1.8rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1.2rem;
+      color: #16213e;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .add-form {
+      display: flex;
+      gap: .75rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .add-form input {
+      flex: 1;
+      padding: .7rem 1rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: .95rem;
+      transition: border-color .2s;
+      outline: none;
+    }
+
+    .add-form input:focus { border-color: #6c63ff; }
+
+    .btn {
+      padding: .7rem 1.2rem;
+      border: none;
+      border-radius: 10px;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform .1s, box-shadow .2s;
+    }
+
+    .btn:active { transform: scale(.97); }
+
+    .btn-primary {
+      background: #6c63ff;
+      color: white;
+      box-shadow: 0 4px 12px rgba(108,99,255,.35);
+    }
+
+    .btn-primary:hover { background: #574fd6; }
+
+    /* ── Product grid ── */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+
+    .product-item {
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .6rem;
+      cursor: pointer;
+      transition: border-color .2s, box-shadow .2s, transform .15s;
+      background: #fafafa;
+      position: relative;
+      user-select: none;
+    }
+
+    .product-item:hover {
+      border-color: #6c63ff;
+      box-shadow: 0 4px 14px rgba(108,99,255,.2);
+      transform: translateY(-2px);
+    }
+
+    .product-item.selected {
+      border-color: #6c63ff;
+      background: #f0eeff;
+      box-shadow: 0 4px 18px rgba(108,99,255,.25);
+    }
+
+    .product-item .checkmark {
+      position: absolute;
+      top: .5rem;
+      right: .6rem;
+      font-size: .9rem;
+      opacity: 0;
+      transition: opacity .2s;
+    }
+
+    .product-item.selected .checkmark { opacity: 1; }
+
+    .product-icon { font-size: 2.2rem; }
+
+    .product-name {
+      font-size: .9rem;
+      font-weight: 600;
+      text-align: center;
+      color: #2d3748;
+    }
+
+    .product-price {
+      font-size: .85rem;
+      color: #6c63ff;
+      font-weight: 700;
+    }
+
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin-top: .2rem;
+    }
+
+    .qty-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 2px solid #6c63ff;
+      background: white;
+      color: #6c63ff;
+      font-size: 1rem;
+      line-height: 1;
+      cursor: pointer;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s, color .15s;
+    }
+
+    .qty-btn:hover { background: #6c63ff; color: white; }
+
+    .qty-value {
+      font-size: .95rem;
+      font-weight: 700;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .empty-state {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #a0aec0;
+    }
+
+    .empty-state .empty-icon { font-size: 3rem; display: block; margin-bottom: .8rem; }
+
+    /* ── Cart panel ── */
+    .cart-panel { position: sticky; top: 1.5rem; }
+
+    .cart-items { margin-top: 1rem; display: flex; flex-direction: column; gap: .6rem; }
+
+    .cart-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: .9rem;
+      padding: .5rem .6rem;
+      background: #f7f7ff;
+      border-radius: 8px;
+    }
+
+    .cart-line .line-name { font-weight: 500; }
+    .cart-line .line-total { font-weight: 700; color: #6c63ff; }
+
+    .cart-empty {
+      text-align: center;
+      color: #a0aec0;
+      padding: 1.5rem 0;
+      font-size: .9rem;
+    }
+
+    .divider {
+      border: none;
+      border-top: 2px solid #e2e8f0;
+      margin: 1rem 0;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    .total-amount { color: #6c63ff; font-size: 1.35rem; }
+
+    .btn-checkout {
+      width: 100%;
+      margin-top: 1.2rem;
+      padding: .9rem;
+      background: linear-gradient(135deg, #6c63ff, #574fd6);
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(108,99,255,.4);
+      transition: transform .1s, box-shadow .2s;
+    }
+
+    .btn-checkout:hover { box-shadow: 0 6px 20px rgba(108,99,255,.5); }
+    .btn-checkout:active { transform: scale(.98); }
+    .btn-checkout:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── Customer form ── */
+    .customer-form { display: flex; flex-direction: column; gap: .7rem; margin-bottom: 1rem; }
+
+    .form-field { display: flex; flex-direction: column; gap: .3rem; }
+
+    .form-field label { font-size: .8rem; font-weight: 600; color: #4a5568; }
+
+    .form-field input {
+      padding: .6rem .9rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: .9rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .form-field input:focus { border-color: #6c63ff; }
+
+    .form-field input.error { border-color: #e53e3e; }
+
+    /* toast */
+
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1a1a2e;
+      color: white;
+      padding: .75rem 1.5rem;
+      border-radius: 999px;
+      font-size: .9rem;
+      font-weight: 500;
+      opacity: 0;
+      transition: transform .3s ease, opacity .3s ease;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <span>🛒</span>
+  <h1>Product Winkel</h1>
+</header>
+
+<div class="container">
+
+  <!-- Left: catalog -->
+  <div>
+    <div class="card">
+      <h2>➕ Product toevoegen</h2>
+      <div class="add-form">
+        <input type="text" id="productInput" placeholder="Naam van het product…" maxlength="50" />
+        <button class="btn btn-primary" onclick="addProduct()">Toevoegen</button>
+      </div>
+
+      <h2>📦 Producten <span id="productCount" style="color:#a0aec0; font-weight:400; font-size:.9rem;">(0)</span></h2>
+      <div class="product-grid" id="productGrid">
+        <div class="empty-state">
+          <span class="empty-icon">📭</span>
+          Voeg je eerste product toe via het formulier hierboven.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: cart -->
+  <div class="cart-panel">
+    <div class="card">
+      <h2>🧾 Winkelwagen</h2>
+      <div class="cart-items" id="cartItems">
+        <div class="cart-empty">Geen producten geselecteerd.</div>
+      </div>
+      <hr class="divider" />
+      <div class="total-row">
+        <span>Totaal</span>
+        <span class="total-amount" id="totalAmount">€ 0,00</span>
+      </div>
+
+      <hr class="divider" />
+      <h2 style="margin-bottom:.8rem">👤 Jouw gegevens</h2>
+      <div class="customer-form">
+        <div class="form-field">
+          <label for="klantNaam">Naam</label>
+          <input type="text" id="klantNaam" placeholder="Jouw naam…" maxlength="60" />
+        </div>
+        <div class="form-field">
+          <label for="klantTel">Telefoonnummer</label>
+          <input type="tel" id="klantTel" placeholder="06-12345678" maxlength="20" />
+        </div>
+        <div class="form-field">
+          <label for="klantVekil">Vekil <span style="color:#a0aec0; font-weight:400;">(optioneel)</span></label>
+          <input type="text" id="klantVekil" placeholder="Naam vekil… (optioneel)" maxlength="60" />
+        </div>
+      </div>
+
+      <button class="btn-checkout" id="checkoutBtn" disabled onclick="checkout()">
+        Bestelling plaatsen
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // Seed a few example products
+  const products = [
+    { id: 1, name: 'Eten',   icon: '🍽️', qty: 0, price: 1 },
+    { id: 2, name: 'Sadaka', icon: '🤲', qty: 0, price: 2 },
+    { id: 3, name: 'Zekat',  icon: '💝', qty: 0, price: 3 },
+  ];
+
+  let nextId = 4;
+  const icons = ['📦','🎁','🛍️','🔧','🖨️','📱','🎧','💡','🖱️','📷'];
+
+  function randomIcon() {
+    return icons[Math.floor(Math.random() * icons.length)];
+  }
+
+  function addProduct() {
+    const input = document.getElementById('productInput');
+    const name = input.value.trim();
+    if (!name) { showToast('Vul een productnaam in.'); return; }
+    if (products.find(p => p.name.toLowerCase() === name.toLowerCase())) {
+      showToast('Dit product bestaat al.'); return;
+    }
+    products.push({ id: nextId++, name, icon: randomIcon(), qty: 0, price: 1 });
+    input.value = '';
+    renderGrid();
+    showToast(`"${name}" toegevoegd!`);
+  }
+
+  function changeQty(id, delta) {
+    const p = products.find(p => p.id === id);
+    if (!p) return;
+    p.qty = Math.max(0, p.qty + delta);
+    renderGrid();
+    renderCart();
+  }
+
+  function renderGrid() {
+    const grid = document.getElementById('productGrid');
+    document.getElementById('productCount').textContent = `(${products.length})`;
+
+    if (products.length === 0) {
+      grid.innerHTML = `<div class="empty-state"><span class="empty-icon">📭</span>Voeg je eerste product toe via het formulier hierboven.</div>`;
+      return;
+    }
+
+    grid.innerHTML = products.map(p => `
+      <div class="product-item ${p.qty > 0 ? 'selected' : ''}" onclick="changeQty(${p.id}, 1)">
+        <span class="checkmark">✅</span>
+        <span class="product-icon">${p.icon}</span>
+        <span class="product-name">${escHtml(p.name)}</span>
+        <span class="product-price">€ ${p.price.toLocaleString('nl-NL', {minimumFractionDigits:2})},- / stuk</span>
+        <div class="qty-controls" onclick="event.stopPropagation()">
+          <button class="qty-btn" onclick="changeQty(${p.id}, -1)">−</button>
+          <span class="qty-value">${p.qty}</span>
+          <button class="qty-btn" onclick="changeQty(${p.id}, 1)">+</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderCart() {
+    const selected = products.filter(p => p.qty > 0);
+    const cartDiv = document.getElementById('cartItems');
+    const totalEl = document.getElementById('totalAmount');
+    const checkoutBtn = document.getElementById('checkoutBtn');
+
+    if (selected.length === 0) {
+      cartDiv.innerHTML = `<div class="cart-empty">Geen producten geselecteerd.</div>`;
+      totalEl.textContent = '€ 0,00';
+      checkoutBtn.disabled = true;
+      return;
+    }
+
+    const total = selected.reduce((sum, p) => sum + p.qty * p.price, 0);
+
+    cartDiv.innerHTML = selected.map(p => `
+      <div class="cart-line">
+        <span class="line-name">${escHtml(p.icon)} ${escHtml(p.name)} × ${p.qty}</span>
+        <span class="line-total">€ ${(p.qty * p.price).toLocaleString('nl-NL')},00</span>
+      </div>
+    `).join('');
+
+    totalEl.textContent = `€ ${total.toLocaleString('nl-NL')},00`;
+    checkoutBtn.disabled = false;
+  }
+
+  function checkout() {
+    const naam  = document.getElementById('klantNaam').value.trim();
+    const tel   = document.getElementById('klantTel').value.trim();
+    const vekil = document.getElementById('klantVekil').value.trim();
+
+    // Validate fields
+    let valid = true;
+    document.getElementById('klantNaam').classList.remove('error');
+    document.getElementById('klantTel').classList.remove('error');
+    if (!naam) { document.getElementById('klantNaam').classList.add('error'); valid = false; }
+    if (!tel)  { document.getElementById('klantTel').classList.add('error');  valid = false; }
+    if (!valid) { showToast('Vul je naam en telefoonnummer in.'); return; }
+
+    const selected = products.filter(p => p.qty > 0);
+    const total = selected.reduce((sum, p) => sum + p.qty * p.price, 0);
+    const productList = selected.map(p => `${p.qty}x${p.name}`).join('-');
+    const vekilDeel = vekil ? `-Vekil-${vekil}` : '-Vekil-FARKETMEZ';
+    const description = `${naam}-${tel}${vekilDeel}-${productList}`;
+    const bunqUrl = `https://bunq.me/GEVENDEHAND/${total}/${encodeURIComponent(description).replace(/%20/g, '+').replace(/%2C/g, ',')}`;
+
+    products.forEach(p => p.qty = 0);
+    document.getElementById('klantNaam').value = '';
+    document.getElementById('klantTel').value = '';
+    document.getElementById('klantVekil').value = '';
+    renderGrid();
+    renderCart();
+    window.open(bunqUrl, '_blank');
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // Allow Enter key in input
+  document.getElementById('productInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addProduct();
+  });
+
+  // Initial render
+  renderGrid();
+  renderCart();
+</script>
+</body>
+</html>
