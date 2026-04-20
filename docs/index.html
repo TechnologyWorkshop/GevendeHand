@@ -332,15 +332,15 @@
       <div class="customer-form">
         <div class="form-field">
           <label for="klantNaam">Namen</label>
-          <input type="text" id="klantNaam" placeholder="Namen offer gevende…" maxlength="60" />
+          <input type="text" id="klantNaam" placeholder="Namen offer gevende…" maxlength="60" pattern="[A-Za-z ]+" title="Alleen letters toegestaan." />
         </div>
         <div class="form-field">
           <label for="klantTel">Telefoonnummer</label>
-          <input type="tel" id="klantTel" placeholder="06-12345678" maxlength="20" />
+          <input type="tel" id="klantTel" placeholder="06-12345678" maxlength="20" pattern="[0-9-]+" inputmode="numeric" title="Alleen cijfers en streepjes toegestaan." />
         </div>
         <div class="form-field">
-          <label for="klantVekil">Gemachtigde <span style="color:#a0aec0; font-weight:400;">(optioneel)</span></label>
-          <input type="text" id="klantVekil" placeholder="Naam vekil… (optioneel)" maxlength="60" />
+          <label for="klantVekil">Gemachtigde</label>
+          <input type="text" id="klantVekil" placeholder="Naam vekil…" maxlength="60" pattern="[A-Za-z ]+" title="Alleen letters toegestaan." />
         </div>
       </div>
 
@@ -357,9 +357,22 @@
 <script>
   // Seed a few example products
   const optionLabels = ['Vacip', 'Adak', 'Şukur', 'Akika'];
+  const nlLetterPattern = /^[A-Za-z\s]+$/;
+  const phonePattern = /^[0-9-]+$/;
   const products = [
     { id: 1, name: 'Afrika',      icon: '🌍', qty: 0, price: 100, selectedOption: 'Vacip' },
   ];
+
+  function sanitizeNlLetters(value) {
+    return value
+      .replace(/[^A-Za-z\s]/g, '')
+      .replace(/\s+/g, ' ')
+      .trimStart();
+  }
+
+  function sanitizePhone(value) {
+    return value.replace(/[^0-9-]/g, '');
+  }
 
   function changeQty(id, delta) {
     const p = products.find(p => p.id === id);
@@ -439,14 +452,28 @@
     const naam  = document.getElementById('klantNaam').value.trim();
     const tel   = document.getElementById('klantTel').value.trim();
     const vekil = document.getElementById('klantVekil').value.trim();
+    const isNaamEmpty = !naam;
+    const isTelEmpty = !tel;
+    const isVekilEmpty = !vekil;
 
     // Validate fields
     let valid = true;
     document.getElementById('klantNaam').classList.remove('error');
     document.getElementById('klantTel').classList.remove('error');
-    if (!naam) { document.getElementById('klantNaam').classList.add('error'); valid = false; }
-    if (!tel)  { document.getElementById('klantTel').classList.add('error');  valid = false; }
-    if (!valid) { showToast('Vul je naam en telefoonnummer in.'); return; }
+    document.getElementById('klantVekil').classList.remove('error');
+    if (isNaamEmpty || !nlLetterPattern.test(naam)) { document.getElementById('klantNaam').classList.add('error'); valid = false; }
+    if (isTelEmpty || !phonePattern.test(tel))  { document.getElementById('klantTel').classList.add('error');  valid = false; }
+    if (isVekilEmpty || !nlLetterPattern.test(vekil)) { document.getElementById('klantVekil').classList.add('error'); valid = false; }
+    if (!valid) {
+      if (isNaamEmpty || isTelEmpty || isVekilEmpty) {
+        showToast('Vul je Namen, Telefoonnummer en Gemachtigde in');
+      } else if (!nlLetterPattern.test(naam) || !nlLetterPattern.test(vekil)) {
+        showToast('Namen/Gemachtigde: alleen normale letters');
+      } else {
+        showToast('Telefoonnummer: alleen cijfers en streepjes.');
+      }
+      return;
+    }
 
     const selected = products.filter(p => p.qty > 0);
     const total = selected.reduce((sum, p) => sum + p.qty * p.price, 0);
@@ -482,6 +509,26 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
   }
+
+  ['klantNaam', 'klantVekil'].forEach(id => {
+    const input = document.getElementById(id);
+    input.addEventListener('input', () => {
+      const rawValue = input.value;
+      input.value = sanitizeNlLetters(rawValue);
+      if (/[^A-Za-z\s]/.test(rawValue)) {
+        showToast('Namen/Gemachtigde: alleen normale letters');
+      }
+    });
+  });
+
+  const phoneInput = document.getElementById('klantTel');
+  phoneInput.addEventListener('input', () => {
+    const rawValue = phoneInput.value;
+    phoneInput.value = sanitizePhone(rawValue);
+    if (/[^0-9-]/.test(rawValue)) {
+      showToast('Telefoon: alleen cijfers en streepjes.');
+    }
+  });
 
   // Initial render
   renderGrid();
