@@ -268,6 +268,25 @@
 
     .form-field input.error { border-color: #e53e3e; }
 
+    .form-field select {
+      padding: .6rem .9rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: .9rem;
+      outline: none;
+      transition: border-color .2s;
+      background: white;
+      cursor: pointer;
+      appearance: auto;
+    }
+
+    .form-field select:focus { border-color: #0e5e55; }
+
+    .form-field select.error { border-color: #e53e3e; }
+
+    .form-field select.placeholder { color: #a0aec0; }
+    .form-field select option { color: #1a1a2e; }
+
     /* toast */
 
     .toast {
@@ -340,7 +359,14 @@
         </div>
         <div class="form-field">
           <label for="klantVekil">Gemachtigde</label>
-          <input type="text" id="klantVekil" placeholder="Naam vekil…" maxlength="60" pattern="[A-Za-z ]+" title="Alleen letters toegestaan." />
+          <select id="klantVekil" class="placeholder" onchange="this.classList.remove('placeholder')">
+            <option value="" disabled selected hidden>Kies een gemachtigde…</option>
+            <option value="Kenan_Kurnaz">Kenan Kurnaz</option>
+            <option value="Adem_Cicek">Adem Cicek</option>
+            <option value="Ali_Sahin">Ali Sahin</option>
+            <option value="Hasan_Akgul">Hasan Akgul</option>
+            <option value="Veli_Karaca">Veli Karaca</option>
+          </select>
         </div>
       </div>
 
@@ -463,12 +489,12 @@
     document.getElementById('klantVekil').classList.remove('error');
     if (isNaamEmpty || !nlLetterPattern.test(naam)) { document.getElementById('klantNaam').classList.add('error'); valid = false; }
     if (isTelEmpty || !phonePattern.test(tel))  { document.getElementById('klantTel').classList.add('error');  valid = false; }
-    if (isVekilEmpty || !nlLetterPattern.test(vekil)) { document.getElementById('klantVekil').classList.add('error'); valid = false; }
+    if (isVekilEmpty) { document.getElementById('klantVekil').classList.add('error'); valid = false; }
     if (!valid) {
       if (isNaamEmpty || isTelEmpty || isVekilEmpty) {
         showToast('Vul je Namen, Telefoonnummer en Gemachtigde in');
-      } else if (!nlLetterPattern.test(naam) || !nlLetterPattern.test(vekil)) {
-        showToast('Namen/Gemachtigde: alleen normale letters');
+      } else if (!nlLetterPattern.test(naam)) {
+        showToast('Namen: alleen normale letters');
       } else {
         showToast('Telefoonnummer: alleen cijfers en streepjes.');
       }
@@ -492,6 +518,7 @@
     document.getElementById('klantNaam').value = '';
     document.getElementById('klantTel').value = '';
     document.getElementById('klantVekil').value = '';
+    document.getElementById('klantVekil').classList.add('placeholder');
     renderGrid();
     renderCart();
     window.open(bunqUrl, '_blank');
@@ -510,15 +537,13 @@
     toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
   }
 
-  ['klantNaam', 'klantVekil'].forEach(id => {
-    const input = document.getElementById(id);
-    input.addEventListener('input', () => {
-      const rawValue = input.value;
-      input.value = sanitizeNlLetters(rawValue);
-      if (/[^A-Za-z\s]/.test(rawValue)) {
-        showToast('Namen/Gemachtigde: alleen normale letters');
-      }
-    });
+  const naamInput = document.getElementById('klantNaam');
+  naamInput.addEventListener('input', () => {
+    const rawValue = naamInput.value;
+    naamInput.value = sanitizeNlLetters(rawValue);
+    if (/[^A-Za-z\s]/.test(rawValue)) {
+      showToast('Namen: alleen normale letters');
+    }
   });
 
   const phoneInput = document.getElementById('klantTel');
